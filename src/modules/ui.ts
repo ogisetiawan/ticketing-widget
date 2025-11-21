@@ -1,6 +1,7 @@
 import { ConfigModule } from "./config";
 import { TicketManager, TicketRecord, TicketType } from "./ticketManager";
 import { LottieModule } from "./lottie";
+import { ModalFactory } from "./modalFactory";
 
 const enum TabKey {
   Create = "create",
@@ -23,17 +24,33 @@ type UIElements = {
 export const WidgetUI = (() => {
   let elements: UIElements | null = null;
 
+  const createAndAppendModal = (): HTMLElement => {
+    const widget = document.querySelector(".ticket-widget");
+    if (!widget) {
+      throw new Error("Widget container not found");
+    }
+    const modal = ModalFactory.createModal();
+    widget.appendChild(modal);
+    return modal;
+  };
+
   const queryElements = (): UIElements => {
     const fab = document.getElementById("support-fab") as HTMLButtonElement | null;
-    const modal = document.getElementById("ticket-modal");
-    const closeBtn = document.querySelector(".ticket-modal__close") as HTMLButtonElement | null;
-    const form = document.getElementById("ticket-form") as HTMLFormElement | null;
-    const fileInput = document.getElementById("file-input") as HTMLInputElement | null;
-    const warning = document.getElementById("file-warning");
-    const contactInput = document.getElementById("contact-field") as HTMLInputElement | null;
-    const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-btn");
-    const tabPanels = document.querySelectorAll<HTMLElement>(".tab-panel");
-    const historyBody = document.getElementById("ticket-history-body");
+    let modal = document.getElementById("ticket-modal") as HTMLElement | null;
+
+    // Create modal if it doesn't exist
+    if (!modal) {
+      modal = createAndAppendModal();
+    }
+
+    const closeBtn = modal.querySelector(".ticket-modal__close") as HTMLButtonElement | null;
+    const form = modal.querySelector("#ticket-form") as HTMLFormElement | null;
+    const fileInput = modal.querySelector("#file-input") as HTMLInputElement | null;
+    const warning = modal.querySelector("#file-warning") as HTMLElement | null;
+    const contactInput = modal.querySelector("#contact-field") as HTMLInputElement | null;
+    const tabButtons = modal.querySelectorAll<HTMLButtonElement>(".tab-btn");
+    const tabPanels = modal.querySelectorAll<HTMLElement>(".tab-panel");
+    const historyBody = modal.querySelector("#ticket-history-body") as HTMLElement | null;
 
     if (
       !fab ||
@@ -60,7 +77,7 @@ export const WidgetUI = (() => {
       contactInput,
       tabButtons,
       tabPanels,
-      historyBody,
+      historyBody: historyBody as HTMLElement,
     };
   };
 

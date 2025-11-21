@@ -104,6 +104,18 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.ticket-modal__title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ticket-modal__logo {
+  width: 32px;
+  height: auto;
+  flex-shrink: 0;
+}
+
 .ticket-modal__header h2 {
   margin: 0;
   font-size: 1.25rem;
