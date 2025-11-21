@@ -1,0 +1,236 @@
+import { ConfigModule } from "./config";
+import { TicketManager, TicketRecord, TicketType } from "./ticketManager";
+import { LottieModule } from "./lottie";
+
+const enum TabKey {
+  Create = "create",
+  History = "history",
+}
+
+type UIElements = {
+  fab: HTMLButtonElement;
+  modal: HTMLElement;
+  closeBtn: HTMLButtonElement;
+  form: HTMLFormElement;
+  fileInput: HTMLInputElement;
+  warning: HTMLElement;
+  contactInput: HTMLInputElement;
+  tabButtons: NodeListOf<HTMLButtonElement>;
+  tabPanels: NodeListOf<HTMLElement>;
+  historyBody: HTMLElement;
+};
+
+export const WidgetUI = (() => {
+  let elements: UIElements | null = null;
+
+  const queryElements = (): UIElements => {
+    const fab = document.getElementById("support-fab") as HTMLButtonElement | null;
+    const modal = document.getElementById("ticket-modal");
+    const closeBtn = document.querySelector(".ticket-modal__close") as HTMLButtonElement | null;
+    const form = document.getElementById("ticket-form") as HTMLFormElement | null;
+    const fileInput = document.getElementById("file-input") as HTMLInputElement | null;
+    const warning = document.getElementById("file-warning");
+    const contactInput = document.getElementById("contact-field") as HTMLInputElement | null;
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-btn");
+    const tabPanels = document.querySelectorAll<HTMLElement>(".tab-panel");
+    const historyBody = document.getElementById("ticket-history-body");
+
+    if (
+      !fab ||
+      !modal ||
+      !closeBtn ||
+      !form ||
+      !fileInput ||
+      !warning ||
+      !contactInput ||
+      tabButtons.length === 0 ||
+      tabPanels.length === 0 ||
+      !historyBody
+    ) {
+      throw new Error("Widget elements missing from DOM");
+    }
+
+    return {
+      fab,
+      modal,
+      closeBtn,
+      form,
+      fileInput,
+      warning,
+      contactInput,
+      tabButtons,
+      tabPanels,
+      historyBody,
+    };
+  };
+
+  const toggleModal = (show?: boolean) => {
+    if (!elements) return;
+    const { modal, fab } = elements;
+    const shouldShow = typeof show === "boolean" ? show : modal.getAttribute("aria-hidden") === "true";
+    modal.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+    fab.style.display = shouldShow ? "none" : "inline-flex";
+  };
+
+  const bindModalEvents = () => {
+    if (!elements) return;
+    const { fab, modal, closeBtn } = elements;
+    fab.addEventListener("click", () => toggleModal(true));
+    closeBtn.addEventListener("click", () => toggleModal(false));
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        toggleModal(false);
+      }
+    });
+  };
+
+  const setActiveTab = (target: TabKey) => {
+    if (!elements) return;
+    elements.tabButtons.forEach((button) => {
+      const isActive = button.dataset.tab === target;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-selected", String(isActive));
+    });
+
+    elements.tabPanels.forEach((panel) => {
+      const isActive = panel.id === `${target}-panel`;
+      panel.classList.toggle("active", isActive);
+      panel.toggleAttribute("hidden", !isActive);
+    });
+  };
+
+  const bindTabEvents = () => {
+    if (!elements) return;
+    elements.tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const tab = button.dataset.tab as TabKey;
+        setActiveTab(tab);
+      });
+    });
+  };
+
+  const bindFileValidation = () => {
+    if (!elements) return;
+    const { fileInput, warning } = elements;
+    const { maxFileSize } = ConfigModule.getConfig();
+
+    fileInput.addEventListener("change", () => {
+      warning.textContent = "";
+      const files = Array.from(fileInput.files ?? []);
+      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+
+      if (totalSize > maxFileSize) {
+        warning.textContent = "Total file size exceeds 5 MB. Please reduce the number of files.";
+        fileInput.value = "";
+      }
+    });
+  };
+
+  const renderTickets = () => {
+    if (!elements) return;
+    const { historyBody } = elements;
+    const { emptyStateText } = ConfigModule.getConfig();
+    const list = TicketManager.list();
+
+    if (!list.length) {
+      historyBody.innerHTML = `<tr class="empty-row"><td colspan="6">${emptyStateText}</td></tr>`;
+      return;
+    }
+
+    const rows = list
+      .map(
+        (ticket: TicketRecord) => `
+          <tr>
+            <td>${ticket.user}</td>
+            <td>${ticket.subject}</td>
+            <td>${ticket.apps}</td>
+            <td><span class="badge ${getTypeBadgeClass(ticket.type)}">${ticket.type}</span></td>
+            <td><span class="badge ${getStatusBadgeClass(ticket.status)}">${ticket.status}</span></td>
+            <td>${ticket.date}</td>
+          </tr>
+        `,
+      )
+      .join("");
+
+    historyBody.innerHTML = rows;
+  };
+
+  const getTypeBadgeClass = (type: TicketType): string => {
+    const map: Record<TicketType, string> = {
+      bug: "badge-type-bug",
+      support: "badge-type-support",
+      feature: "badge-type-feature",
+    };
+    return map[type] ?? "badge-type-support";
+  };
+
+  const getStatusBadgeClass = (status: TicketRecord["status"]): string => {
+    const map: Record<TicketRecord["status"], string> = {
+      Pending: "badge-status-pending",
+      "In Progress": "badge-status-in-progress",
+      Resolved: "badge-status-resolved",
+      Closed: "badge-status-closed",
+    };
+    return map[status] ?? "badge-status-pending";
+  };
+
+  const bindFormSubmit = () => {
+    if (!elements) return;
+    const { form, warning, contactInput } = elements;
+    const { successMessage, defaultName, defaultEmail } = ConfigModule.getConfig();
+
+    contactInput.value = `${defaultName} - ${defaultEmail}`;
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (warning.textContent) {
+        return;
+      }
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      const subject = String(formData.get("subject") ?? "").trim();
+      const type = String(formData.get("type") ?? "support") as TicketType;
+
+      TicketManager.addTicket({
+        user: contactInput.value,
+        subject,
+        type,
+      });
+
+      alert(successMessage);
+      form.reset();
+      contactInput.value = `${defaultName} - ${defaultEmail}`;
+      warning.textContent = "";
+      renderTickets();
+      toggleModal(false);
+    });
+  };
+
+  const initLottie = () => {
+    const lottieContainer = document.getElementById("lottie-container");
+    if (lottieContainer) {
+      LottieModule.init(lottieContainer);
+    }
+  };
+
+  const init = () => {
+    elements = queryElements();
+    initLottie();
+    bindModalEvents();
+    bindTabEvents();
+    bindFileValidation();
+    bindFormSubmit();
+    renderTickets();
+  };
+
+  return {
+    init,
+  };
+})();
+
