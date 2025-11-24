@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM Ticketing Widget - Test Page</title>
+
+    <!-- 1. Link ke CSS yang akan di-generate -->
+    <link rel="stylesheet" href="../../dist/style.css">
+
+    <style>
+        /* Style tambahan untuk halaman test */
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Test Widget Ticketing</h1>
+        <p>Widget should appear in the bottom right corner of the page.</p>
+    </div>
+
+    <div class="ticket-widget">
+        <button id="support-fab" aria-label="Open support ticket">
+            <div id="lottie-container" class="lottie-container"></div>
+        </button>
+    </div>
+
+    <!-- 2. Konfigurasi Widget (simulasi data user) -->
+    <script>
+        window.BMTicketingWidgetConfig = {
+            apiUrl: 'https://api.ticketing-bm.com',
+            user: {
+                id: 'test-user-123',
+                name: 'Test User',
+                email: 'test@example.com',
+            }
+        };
+    </script>
+
+    <!-- 3. Load JavaScript widget -->
+    <script src="../../dist/bm-ticketing-widget.iife.js" defer></script>
+
+</body>
+
+</html>
