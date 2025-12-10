@@ -88,10 +88,10 @@ export const ModalFactory = (() => {
         typeSelect.required = true;
         typeSelect.innerHTML = `
       <option value="">Select Report Type...</option>
-      <option value="bug">Bug Report</option>
-      <option value="support">Support</option>
-      <option value="feature">Feature Request</option>
-      <option value="others">Others</option>
+      <option value="Bug Report">Bug Report</option>
+      <option value="Support">Support</option>
+      <option value="Feature Request">Feature Request</option>
+      <option value="Others">Others</option>
     `;
         typeLabel.appendChild(typeLabelText);
         typeLabel.appendChild(typeSelect);

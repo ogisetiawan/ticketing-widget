@@ -83,7 +83,7 @@
 
 .ticket-modal__content {
   position: relative;
-  width: min(640px, 100%);
+  width: min(900px, 100%);
   background: var(--modal-bg);
   border-radius: 16px;
   color: var(--primary-text);

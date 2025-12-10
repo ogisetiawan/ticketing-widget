@@ -182,10 +182,10 @@ export const WidgetUI = (() => {
 
   const getTypeBadgeClass = (type: TicketType): string => {
     const map: Record<TicketType, string> = {
-      bug: "badge-type-bug",
-      support: "badge-type-support",
-      feature: "badge-type-feature",
-      others: "badge-type-others",
+      "Bug Report": "badge-type-bug",
+      Support: "badge-type-support",
+      "Feature Request": "badge-type-feature",
+      Others: "badge-type-others",
     };
     return map[type] ?? "badge-type-support";
   };
@@ -202,12 +202,13 @@ export const WidgetUI = (() => {
 
   const bindFormSubmit = () => {
     if (!elements) return;
-    const { form, warning, contactInput } = elements;
-    const { successMessage, defaultName, defaultEmail } = ConfigModule.getConfig();
+    const { form, warning, contactInput, fileInput } = elements;
+    const { successMessage, defaultName, defaultEmail, apiUrl, sharedSecret, appsLabel } = ConfigModule.getConfig();
 
-    contactInput.value = `${defaultName} - ${defaultEmail}`;
+    const userDisplay = `${defaultName} - ${defaultEmail}`;
+    contactInput.value = userDisplay;
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       if (warning.textContent) {
@@ -221,20 +222,52 @@ export const WidgetUI = (() => {
 
       const formData = new FormData(form);
       const subject = String(formData.get("subject") ?? "").trim();
-      const type = String(formData.get("type") ?? "support") as TicketType;
+      const type = String(formData.get("type") ?? "Support") as TicketType;
+      const message = String(formData.get("message") ?? "").trim();
+      const files = Array.from(fileInput.files ?? []);
 
-      TicketManager.addTicket({
-        user: contactInput.value,
-        subject,
-        type,
-      });
+      const payload = new FormData();
+      payload.set("email", defaultEmail);
+      payload.set("username", defaultName);
+      payload.set("subject", subject);
+      payload.set("messages", message);
+      payload.set("type", type);
+      payload.set("apps", appsLabel);
+      files.forEach((file) => payload.append("files", file));
 
-      alert(successMessage);
-      form.reset();
-      contactInput.value = `${defaultName} - ${defaultEmail}`;
-      warning.textContent = "";
-      renderTickets();
-      toggleModal(false);
+      const headers: Record<string, string> = {};
+      if (sharedSecret) {
+        headers["x-shared-secret"] = sharedSecret;
+      }
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers,
+          body: payload,
+        });
+
+        if (!response.ok) {
+          warning.textContent = `Failed to submit ticket. (${response.status})`;
+          return;
+        }
+
+        TicketManager.addTicket({
+          user: contactInput.value,
+          subject,
+          type,
+        });
+
+        alert(successMessage);
+        form.reset();
+        contactInput.value = userDisplay;
+        warning.textContent = "";
+        renderTickets();
+        toggleModal(false);
+      } catch (error) {
+        console.error(error);
+        warning.textContent = "Network error while submitting ticket.";
+      }
     });
   };
 
