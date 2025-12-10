@@ -1,6 +1,6 @@
 import { ConfigModule } from "./config";
 
-export type TicketType = "bug" | "support" | "feature";
+export type TicketType = "bug" | "support" | "feature" | "others";
 export type TicketStatus = "Pending" | "In Progress" | "Resolved" | "Closed";
 
 export type TicketRecord = {

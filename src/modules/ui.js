@@ -101,14 +101,20 @@ export const WidgetUI = (() => {
         if (!elements)
             return;
         const { fileInput, warning } = elements;
-        const { maxFileSize } = ConfigModule.getConfig();
+        const { maxFileSize, maxFiles } = ConfigModule.getConfig();
         fileInput.addEventListener("change", () => {
             warning.textContent = "";
             const files = Array.from(fileInput.files ?? []);
             const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-            if (totalSize > maxFileSize) {
-                warning.textContent = "Total file size exceeds 5 MB. Please reduce the number of files.";
+            if (files.length > maxFiles) {
+                warning.textContent = `Maximum ${maxFiles} files allowed. Please reduce the number of files.`;
                 fileInput.value = "";
+                return;
+            }
+            if (totalSize > maxFileSize) {
+                warning.textContent = `Total file size exceeds ${maxFileSize / (1024 * 1024)} MB. Please reduce the file size.`;
+                fileInput.value = "";
+                return;
             }
         });
     };
@@ -119,12 +125,13 @@ export const WidgetUI = (() => {
         const { emptyStateText } = ConfigModule.getConfig();
         const list = TicketManager.list();
         if (!list.length) {
-            historyBody.innerHTML = `<tr class="empty-row"><td colspan="6">${emptyStateText}</td></tr>`;
+            historyBody.innerHTML = `<tr class="empty-row"><td colspan="7">${emptyStateText}</td></tr>`;
             return;
         }
         const rows = list
             .map((ticket) => `
           <tr>
+            <td>${ticket.id}</td>
             <td>${ticket.user}</td>
             <td>${ticket.subject}</td>
             <td>${ticket.apps}</td>
@@ -141,6 +148,7 @@ export const WidgetUI = (() => {
             bug: "badge-type-bug",
             support: "badge-type-support",
             feature: "badge-type-feature",
+            others: "badge-type-others",
         };
         return map[type] ?? "badge-type-support";
     };

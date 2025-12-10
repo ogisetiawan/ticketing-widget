@@ -109,6 +109,7 @@ export const ModalFactory = (() => {
       <option value="bug">Bug Report</option>
       <option value="support">Support</option>
       <option value="feature">Feature Request</option>
+      <option value="others">Others</option>
     `;
     typeLabel.appendChild(typeLabelText);
     typeLabel.appendChild(typeSelect);
@@ -144,11 +145,15 @@ export const ModalFactory = (() => {
     fileInput.id = "file-input";
     fileInput.name = "files";
     fileInput.multiple = true;
+    const fileDescription = document.createElement("small");
+    fileDescription.className = "text-danger";
+    fileDescription.textContent = "Maximal file upload: 5 files, Max size total: 10MB";
     const fileWarning = document.createElement("small");
     fileWarning.id = "file-warning";
     fileWarning.className = "file-warning";
     fileLabel.appendChild(fileLabelText);
     fileLabel.appendChild(fileInput);
+    fileLabel.appendChild(fileDescription);
     fileLabel.appendChild(fileWarning);
 
     // Submit button
@@ -177,7 +182,7 @@ export const ModalFactory = (() => {
     const table = document.createElement("table");
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    ["User", "Subject", "Apps", "Type", "Status", "Date"].forEach((text) => {
+    ["ID Ticket", "User", "Subject", "Apps", "Type", "Status", "Date"].forEach((text) => {
       const th = document.createElement("th");
       th.textContent = text;
       headerRow.appendChild(th);
@@ -188,7 +193,7 @@ export const ModalFactory = (() => {
     const emptyRow = document.createElement("tr");
     emptyRow.className = "empty-row";
     const emptyCell = document.createElement("td");
-    emptyCell.colSpan = 6;
+    emptyCell.colSpan = 7;
     emptyCell.textContent = "No tickets submitted yet.";
     emptyRow.appendChild(emptyCell);
     tbody.appendChild(emptyRow);
