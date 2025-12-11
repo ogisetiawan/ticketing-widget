@@ -200,6 +200,38 @@ export const WidgetUI = (() => {
     return map[status] ?? "badge-status-pending";
   };
 
+  const showToast = (message: string | null, duration: number) => {
+    let toastElement = document.querySelector('.toast');
+
+    if (!toastElement) {
+        toastElement = document.createElement('div');
+        toastElement.className = 'toast';
+        document.body.appendChild(toastElement);
+    }
+
+    toastElement.textContent = message;
+
+    setTimeout(() => {
+        toastElement.classList.add('show');
+    }, 10); 
+
+    setTimeout(() => {
+        hideToast(toastElement);
+    }, duration);
+  }
+
+  const hideToast = (toastElement: Element) => {
+    if (!toastElement) return;
+
+    toastElement.classList.remove('show');
+
+    setTimeout(() => {
+        if (toastElement.parentNode) {
+          toastElement.parentNode.removeChild(toastElement);
+        }
+    }, 400); 
+  }
+
   const bindFormSubmit = () => {
     if (!elements) return;
     const { form, warning, contactInput, fileInput } = elements;
@@ -281,7 +313,7 @@ export const WidgetUI = (() => {
           type,
         });
 
-        alert(successMessage);
+        showToast(successMessage, 4000);
         form.reset();
         contactInput.value = userDisplay;
         warning.textContent = "";

@@ -304,6 +304,10 @@
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: capitalize;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
 }
 
 .badge-type-bug {
@@ -374,6 +378,27 @@ button .spinner {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px; 
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color:var(--modal-bg);
+  padding: 12px 24px;
+  border-radius: 8px; 
+  font-size: 14px;
+  z-index: 9999; 
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 @media (max-width: 480px) {
