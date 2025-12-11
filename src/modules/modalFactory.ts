@@ -145,9 +145,10 @@ export const ModalFactory = (() => {
     fileInput.id = "file-input";
     fileInput.name = "files";
     fileInput.multiple = true;
+    fileInput.accept = ".png,.jpg,.jpeg,.pdf,.csv,.xls,.xlsx,.doc,.docx,.txt";
     const fileDescription = document.createElement("small");
     fileDescription.className = "text-danger";
-    fileDescription.textContent = "Maximal file upload: 5 files, Max size total: 10MB";
+    fileDescription.textContent = "* Only Images and Documents, Maximal file upload: 5 files, Max size total: 10MB";
     const fileWarning = document.createElement("small");
     fileWarning.id = "file-warning";
     fileWarning.className = "file-warning";

@@ -38,7 +38,6 @@ export const WidgetUI = (() => {
     const fab = document.getElementById("support-fab") as HTMLButtonElement | null;
     let modal = document.getElementById("ticket-modal") as HTMLElement | null;
 
-    // Create modal if it doesn't exist
     if (!modal) {
       modal = createAndAppendModal();
     }
@@ -130,20 +129,49 @@ export const WidgetUI = (() => {
     if (!elements) return;
     const { fileInput, warning } = elements;
     const { maxFileSize, maxFiles } = ConfigModule.getConfig();
+    const allowedExtensions = [
+      "png",
+      "jpg",
+      "jpeg",
+      "pdf",
+      "csv",
+      "xls",
+      "xlsx",
+      "doc",
+      "docx",
+      "txt",
+    ];
 
     fileInput.addEventListener("change", () => {
       warning.textContent = "";
       const files = Array.from(fileInput.files ?? []);
       const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+      let textWarning = ``;
+
+      const hasInvalidFile = files.some((file) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "";
+        return !allowedExtensions.includes(ext);
+      });
+
+      if (hasInvalidFile) {
+        textWarning = "Only PNG, JPG/JPEG, PDF, CSV, XLS/XLSX, DOC/DOCX, or TXT files are allowed.";
+        showToast(textWarning, 4000);
+        fileInput.value = "";
+        return;
+      }
 
       if (files.length > maxFiles) {
-        warning.textContent = `Maximum ${maxFiles} files allowed. Please reduce the number of files.`;
+        textWarning = `Maximum ${maxFiles} files allowed. Please reduce the number of files.`;
+        // warning.textContent = textWarning
+        showToast(textWarning, 4000);
         fileInput.value = "";
         return;
       }
 
       if (totalSize > maxFileSize) {
-        warning.textContent = `Total file size exceeds ${maxFileSize / (1024 * 1024)} MB. Please reduce the file size.`;
+        textWarning = `Total file size exceeds ${maxFileSize / (1024 * 1024)} MB. Please reduce the file size.`;
+        // warning.textContent = textWarning
+        showToast(textWarning, 4000);
         fileInput.value = "";
         return;
       }
@@ -239,7 +267,7 @@ export const WidgetUI = (() => {
 
     const userDisplay = `${defaultName} - ${defaultEmail}`;
     contactInput.value = userDisplay;
-
+    let textWarning = ``;
     const setLoading = (isLoading: boolean) => {
       const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
       
@@ -303,7 +331,8 @@ export const WidgetUI = (() => {
         });
 
         if (!response.ok) {
-          warning.textContent = `Failed to submit ticket. (${response.status})`;
+          textWarning = `Failed to submit ticket. (${response.status})`;
+          showToast(textWarning, 40000);
           return;
         }
 
@@ -321,7 +350,8 @@ export const WidgetUI = (() => {
         toggleModal(false);
       } catch (error) {
         console.error(error);
-        warning.textContent = "Network error while submitting ticket.";
+        textWarning = "Network error while submitting ticket.";
+        showToast(textWarning, 40000)
       } finally {
         setLoading(false);
       }
