@@ -208,6 +208,28 @@ export const WidgetUI = (() => {
     const userDisplay = `${defaultName} - ${defaultEmail}`;
     contactInput.value = userDisplay;
 
+    const setLoading = (isLoading: boolean) => {
+      const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      
+      if (!submitButton) return;
+      submitButton.disabled = isLoading;
+
+      if (isLoading) {
+          if (!submitButton.dataset.originalText) {
+              submitButton.dataset.originalText = submitButton.innerHTML;
+          }
+          
+          submitButton.classList.add('loading');
+          submitButton.innerHTML = `
+              <span class="spinner"></span>
+              Submitting...
+          `;
+      } else {
+          submitButton.classList.remove('loading');
+          submitButton.innerHTML = submitButton.dataset.originalText || 'Submit Ticket';
+      }
+    }
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
@@ -240,6 +262,7 @@ export const WidgetUI = (() => {
         headers["x-shared-secret"] = sharedSecret;
       }
 
+      setLoading(true);
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -267,6 +290,8 @@ export const WidgetUI = (() => {
       } catch (error) {
         console.error(error);
         warning.textContent = "Network error while submitting ticket.";
+      } finally {
+        setLoading(false);
       }
     });
   };

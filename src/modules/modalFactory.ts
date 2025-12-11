@@ -33,7 +33,7 @@ export const ModalFactory = (() => {
     const closeBtn = document.createElement("button");
     closeBtn.className = "ticket-modal__close";
     closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.innerHTML = "&times;";
+    closeBtn.innerHTML = `<svg aria-hidden="true" role="graphics-symbol" viewBox="0 0 20 20" class="dashLong" style="width: 20px; height: 20px; display: block; fill: var(--c-icoPri); flex-shrink: 0;"><path d="M4 9.375a.625.625 0 1 0 0 1.25h12a.625.625 0 1 0 0-1.25z"></path></svg>`;
 
     header.appendChild(headerTitle);
     header.appendChild(closeBtn);
