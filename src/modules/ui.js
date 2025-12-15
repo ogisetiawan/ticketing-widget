@@ -90,9 +90,12 @@ export const WidgetUI = (() => {
         if (!elements)
             return;
         elements.tabButtons.forEach((button) => {
-            button.addEventListener("click", () => {
+            button.addEventListener("click", async () => {
                 const tab = button.dataset.tab;
                 setActiveTab(tab);
+                if (tab === "history" /* TabKey.History */) {
+                    await fetchMyTickets();
+                }
             });
         });
     };
@@ -158,12 +161,12 @@ export const WidgetUI = (() => {
             .map((ticket) => `
           <tr>
             <td>${ticket.id}</td>
-            <td>${ticket.user}</td>
+            <td>${ticket.user} - ${ticket.email}</td>
             <td>${ticket.subject}</td>
             <td>${ticket.apps}</td>
             <td><span class="badge ${getTypeBadgeClass(ticket.type)}">${ticket.type}</span></td>
             <td><span class="badge ${getStatusBadgeClass(ticket.status)}">${ticket.status}</span></td>
-            <td>${ticket.date}</td>
+            <td>${ticket.createdAt}</td>
           </tr>
         `)
             .join("");
@@ -188,10 +191,10 @@ export const WidgetUI = (() => {
         return map[status] ?? "badge-status-pending";
     };
     const showToast = (message, duration) => {
-        let toastElement = document.querySelector('.toast-bm-ticket');
+        let toastElement = document.querySelector('.toast-bm-ticketing');
         if (!toastElement) {
             toastElement = document.createElement('div');
-            toastElement.className = 'toast-bm-ticket';
+            toastElement.className = 'toast-bm-ticketing';
             document.body.appendChild(toastElement);
         }
         toastElement.textContent = message;
@@ -212,6 +215,43 @@ export const WidgetUI = (() => {
             }
         }, 400);
     };
+    const fetchMyTickets = async () => {
+        const { apiUrl, defaultEmail, sharedSecret } = ConfigModule.getConfig();
+        try {
+            const response = await fetch(`${apiUrl}/bm-ticketing/tickets/query`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(sharedSecret && { "x-shared-secret": sharedSecret }),
+                },
+                body: JSON.stringify({
+                    filter: {
+                        property: "Email",
+                        email: {
+                            equals: defaultEmail,
+                        },
+                    },
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`Failed fetch tickets (${response.status})`);
+            }
+            const result = await response.json();
+            console.log(result.data.results, 'hai');
+            /**
+             * Asumsi response:
+             * {
+             *   data: TicketRecord[]
+             * }
+             */
+            TicketManager.setTickets(result.data.results || []);
+            renderTickets();
+        }
+        catch (err) {
+            console.error(err);
+            showToast("Failed to load ticket history", 4000);
+        }
+    };
     const bindFormSubmit = () => {
         if (!elements)
             return;
@@ -221,7 +261,7 @@ export const WidgetUI = (() => {
         contactInput.value = userDisplay;
         let textWarning = ``;
         const setLoading = (isLoading) => {
-            const submitButton = form?.querySelector('#btn-submit-widget');
+            const submitButton = form?.querySelector('#btn-bm-ticketing');
             if (!submitButton)
                 return;
             submitButton.disabled = isLoading;

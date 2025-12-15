@@ -118,9 +118,14 @@ export const WidgetUI = (() => {
   const bindTabEvents = () => {
     if (!elements) return;
     elements.tabButtons.forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", async () => {
         const tab = button.dataset.tab as TabKey;
         setActiveTab(tab);
+
+        if (tab === TabKey.History) {
+          await fetchMyTickets();
+        }
+  
       });
     });
   };
@@ -194,12 +199,12 @@ export const WidgetUI = (() => {
         (ticket: TicketRecord) => `
           <tr>
             <td>${ticket.id}</td>
-            <td>${ticket.user}</td>
+            <td>${ticket.user} - ${ticket.email}</td>
             <td>${ticket.subject}</td>
             <td>${ticket.apps}</td>
             <td><span class="badge ${getTypeBadgeClass(ticket.type)}">${ticket.type}</span></td>
             <td><span class="badge ${getStatusBadgeClass(ticket.status)}">${ticket.status}</span></td>
-            <td>${ticket.date}</td>
+            <td>${ticket.createdAt}</td>
           </tr>
         `,
       )
@@ -259,6 +264,40 @@ export const WidgetUI = (() => {
         }
     }, 400); 
   }
+
+  const fetchMyTickets = async () => {
+    const { apiUrl, defaultEmail, sharedSecret } = ConfigModule.getConfig();
+  
+    try {
+      const response = await fetch(`${apiUrl}/bm-ticketing/tickets/query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(sharedSecret && { "x-shared-secret": sharedSecret }),
+        },
+        body: JSON.stringify({
+          filter: {
+            property: "Email",
+            email: {
+              equals: defaultEmail,
+            },
+          },
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed fetch tickets (${response.status})`);
+      }
+  
+      const result = await response.json();
+      TicketManager.setTickets(result.data.results || []);
+      renderTickets();
+  
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to load ticket history", 4000);
+    }
+  };
 
   const bindFormSubmit = () => {
     if (!elements) return;

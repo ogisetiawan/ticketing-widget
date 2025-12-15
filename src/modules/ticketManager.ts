@@ -6,16 +6,17 @@ export type TicketStatus = "Pending" | "In Progress" | "Resolved" | "Closed";
 export type TicketRecord = {
   id: number;
   user: string;
+  email: string;
   subject: string;
   type: TicketType;
   status: TicketStatus;
-  date: string;
+  createdAt: string;
   apps: string;
 };
 
 export const TicketManager = (() => {
   const { appsLabel } = ConfigModule.getConfig();
-  const tickets: TicketRecord[] = [];
+  let tickets: TicketRecord[] = [];
   let counter = 1;
 
   const months = [
@@ -56,7 +57,8 @@ export const TicketManager = (() => {
       type,
       status: "Pending",
       apps: appsLabel,
-      date: formatDate(new Date()),
+      createdAt: formatDate(new Date()),
+      email: ""
     };
     tickets.unshift(record);
     return record;
@@ -64,9 +66,24 @@ export const TicketManager = (() => {
 
   const list = (): readonly TicketRecord[] => tickets;
 
+  const setTickets = (data: TicketRecord[]) => {
+    tickets = data.map((item, index) => ({
+      ...item,
+      id: item.id ?? index + 1,
+    }));
+    counter = tickets.length + 1;
+  };
+
+  const clear = () => {
+    tickets = [];
+    counter = 1;
+  };
+
   return {
     addTicket,
     list,
+    setTickets,
+    clear,
   };
 })();
 

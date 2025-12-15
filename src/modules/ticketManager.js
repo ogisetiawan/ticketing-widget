@@ -1,7 +1,7 @@
 import { ConfigModule } from "./config";
 export const TicketManager = (() => {
     const { appsLabel } = ConfigModule.getConfig();
-    const tickets = [];
+    let tickets = [];
     let counter = 1;
     const months = [
         "Jan",
@@ -31,14 +31,28 @@ export const TicketManager = (() => {
             type,
             status: "Pending",
             apps: appsLabel,
-            date: formatDate(new Date()),
+            createdAt: formatDate(new Date()),
+            email: ""
         };
         tickets.unshift(record);
         return record;
     };
     const list = () => tickets;
+    const setTickets = (data) => {
+        tickets = data.map((item, index) => ({
+            ...item,
+            id: item.id ?? index + 1,
+        }));
+        counter = tickets.length + 1;
+    };
+    const clear = () => {
+        tickets = [];
+        counter = 1;
+    };
     return {
         addTicket,
         list,
+        setTickets,
+        clear,
     };
 })();
