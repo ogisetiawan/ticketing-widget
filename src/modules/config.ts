@@ -1,7 +1,7 @@
 declare global {
   interface Window {
     BMTicketingWidgetConfig?: {
-      apiUrl?: string;
+      // apiUrl?: string;
       payload?: {
         app_name?: string;
         timestamp?: number;
@@ -35,13 +35,13 @@ export const ConfigModule = (() => {
     appsLabel: "Portal Behn Meyer",
     successMessage: "Ticket submitted successfully!",
     emptyStateText: "No tickets submitted yet.",
-    apiUrl: "/bm-ticketing/tickets",
+    apiUrl: import.meta.env.VITE_BM_TICKETING_API || "http://localhost:3000/bm-ticketing/tickets",
     sharedSecret: "",
   };
 
   const buildConfig = (): WidgetConfig => {
     const payload = window.BMTicketingWidgetConfig?.payload ?? {};
-    const apiUrl = window.BMTicketingWidgetConfig?.apiUrl || DEFAULTS.apiUrl;
+    const apiUrl =  DEFAULTS.apiUrl;
     const sharedSecret = window.BMTicketingWidgetConfig?.signature || DEFAULTS.sharedSecret;
 
     return {

@@ -160,6 +160,7 @@ export const ModalFactory = (() => {
     // Submit button
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
+    submitBtn.id = "btn-bm-ticketing";
     submitBtn.textContent = "Submit Ticket";
 
     form.appendChild(userLabel);

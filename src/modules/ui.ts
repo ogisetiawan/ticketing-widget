@@ -229,11 +229,11 @@ export const WidgetUI = (() => {
   };
 
   const showToast = (message: string | null, duration: number) => {
-    let toastElement = document.querySelector('.toast');
+    let toastElement = document.querySelector('.toast-bm-ticketing');
 
     if (!toastElement) {
         toastElement = document.createElement('div');
-        toastElement.className = 'toast';
+        toastElement.className = 'toast-bm-ticketing';
         document.body.appendChild(toastElement);
     }
 
@@ -269,7 +269,7 @@ export const WidgetUI = (() => {
     contactInput.value = userDisplay;
     let textWarning = ``;
     const setLoading = (isLoading: boolean) => {
-      const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      const submitButton = form?.querySelector('#btn-bm-ticketing') as HTMLButtonElement | null;
       
       if (!submitButton) return;
       submitButton.disabled = isLoading;
@@ -281,7 +281,7 @@ export const WidgetUI = (() => {
           
           submitButton.classList.add('loading');
           submitButton.innerHTML = `
-              <span class="spinner"></span>
+              <span class="spinner-bm-widget"></span>
               Submitting...
           `;
       } else {
@@ -324,7 +324,7 @@ export const WidgetUI = (() => {
 
       setLoading(true);
       try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch(apiUrl+'/bm-ticketing/tickets', {
           method: "POST",
           headers,
           body: payload,
@@ -353,7 +353,7 @@ export const WidgetUI = (() => {
         textWarning = "Network error while submitting ticket.";
         showToast(textWarning, 40000)
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     });
   };

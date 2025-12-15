@@ -188,10 +188,10 @@ export const WidgetUI = (() => {
         return map[status] ?? "badge-status-pending";
     };
     const showToast = (message, duration) => {
-        let toastElement = document.querySelector('.toast');
+        let toastElement = document.querySelector('.toast-bm-ticket');
         if (!toastElement) {
             toastElement = document.createElement('div');
-            toastElement.className = 'toast';
+            toastElement.className = 'toast-bm-ticket';
             document.body.appendChild(toastElement);
         }
         toastElement.textContent = message;
@@ -221,7 +221,7 @@ export const WidgetUI = (() => {
         contactInput.value = userDisplay;
         let textWarning = ``;
         const setLoading = (isLoading) => {
-            const submitButton = form?.querySelector('button[type="submit"]');
+            const submitButton = form?.querySelector('#btn-submit-widget');
             if (!submitButton)
                 return;
             submitButton.disabled = isLoading;
@@ -231,7 +231,7 @@ export const WidgetUI = (() => {
                 }
                 submitButton.classList.add('loading');
                 submitButton.innerHTML = `
-              <span class="spinner"></span>
+              <span class="spinner-bm-widget"></span>
               Submitting...
           `;
             }
@@ -268,7 +268,7 @@ export const WidgetUI = (() => {
             }
             setLoading(true);
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch(apiUrl + '/bm-ticketing/tickets', {
                     method: "POST",
                     headers,
                     body: payload,
@@ -296,7 +296,7 @@ export const WidgetUI = (() => {
                 showToast(textWarning, 40000);
             }
             finally {
-                setLoading(false);
+                // setLoading(false);
             }
         });
     };
