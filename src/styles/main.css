@@ -363,6 +363,40 @@
   vertical-align: middle;
 }
 
+@keyframes loading-pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6; 
+  }
+}
+
+.loading-row td {
+  animation: loading-pulse 1.5s infinite ease-in-out; 
+  background-color: #f7f7f7; 
+  color: #555;
+  border-bottom: 1px solid #eee; 
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-row {
+  animation: slide-down 0.3s ease-out;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

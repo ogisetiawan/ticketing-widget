@@ -265,9 +265,20 @@ export const WidgetUI = (() => {
     }, 400); 
   }
 
+  const renderHistoryLoading = () => {
+    if (!elements) return;
+    elements.historyBody.innerHTML = `
+      <tr class="loading-row">
+        <td colspan="7" style="text-align:center; padding:16px">
+          Loading tickets...
+        </td>
+      </tr>
+    `;
+  };
   const fetchMyTickets = async () => {
     const { apiUrl, defaultEmail, sharedSecret } = ConfigModule.getConfig();
-  
+    renderHistoryLoading();
+    
     try {
       const response = await fetch(`${apiUrl}/bm-ticketing/tickets/query`, {
         method: "POST",
@@ -375,11 +386,7 @@ export const WidgetUI = (() => {
           return;
         }
 
-        TicketManager.addTicket({
-          user: contactInput.value,
-          subject,
-          type,
-        });
+        await fetchMyTickets();
 
         showToast(successMessage, 4000);
         form.reset();
@@ -392,7 +399,7 @@ export const WidgetUI = (() => {
         textWarning = "Network error while submitting ticket.";
         showToast(textWarning, 40000)
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
     });
   };

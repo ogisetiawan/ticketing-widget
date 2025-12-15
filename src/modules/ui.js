@@ -215,8 +215,20 @@ export const WidgetUI = (() => {
             }
         }, 400);
     };
+    const renderHistoryLoading = () => {
+        if (!elements)
+            return;
+        elements.historyBody.innerHTML = `
+      <tr class="loading-row">
+        <td colspan="7" style="text-align:center; padding:16px">
+          Loading tickets...
+        </td>
+      </tr>
+    `;
+    };
     const fetchMyTickets = async () => {
         const { apiUrl, defaultEmail, sharedSecret } = ConfigModule.getConfig();
+        renderHistoryLoading();
         try {
             const response = await fetch(`${apiUrl}/bm-ticketing/tickets/query`, {
                 method: "POST",
@@ -237,13 +249,6 @@ export const WidgetUI = (() => {
                 throw new Error(`Failed fetch tickets (${response.status})`);
             }
             const result = await response.json();
-            console.log(result.data.results, 'hai');
-            /**
-             * Asumsi response:
-             * {
-             *   data: TicketRecord[]
-             * }
-             */
             TicketManager.setTickets(result.data.results || []);
             renderTickets();
         }
@@ -318,11 +323,12 @@ export const WidgetUI = (() => {
                     showToast(textWarning, 40000);
                     return;
                 }
-                TicketManager.addTicket({
-                    user: contactInput.value,
-                    subject,
-                    type,
-                });
+                await fetchMyTickets();
+                // TicketManager.addTicket({
+                //   user: contactInput.value,
+                //   subject,
+                //   type,
+                // });
                 showToast(successMessage, 4000);
                 form.reset();
                 contactInput.value = userDisplay;
@@ -336,7 +342,7 @@ export const WidgetUI = (() => {
                 showToast(textWarning, 40000);
             }
             finally {
-                // setLoading(false);
+                setLoading(false);
             }
         });
     };
