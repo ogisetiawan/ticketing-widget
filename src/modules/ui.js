@@ -324,11 +324,6 @@ export const WidgetUI = (() => {
                     return;
                 }
                 await fetchMyTickets();
-                // TicketManager.addTicket({
-                //   user: contactInput.value,
-                //   subject,
-                //   type,
-                // });
                 showToast(successMessage, 4000);
                 form.reset();
                 contactInput.value = userDisplay;

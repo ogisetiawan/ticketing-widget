@@ -326,23 +326,23 @@
 }
 
 .badge-status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: var(--fab-bg-hover);
+  color: var(--modal-bg);
 }
 
 .badge-status-in-progress {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #ffc107;
+  color: var(--modal-bg);
 }
 
 .badge-status-resolved {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #065f46;
+  color: var(--modal-bg);
 }
 
 .badge-status-closed {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--warning);
+  color: var(--modal-bg);
 }
 
 #btn-bm-ticketing.loading {
